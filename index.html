@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TripSplit · Set your budget. We plan the trip.</title>
+<meta name="description" content="TripSplit is a budget-first travel planner. Enter your budget and get complete trips you can actually afford, with a day-by-day plan and a built-in cost splitter.">
+<meta name="theme-color" content="#0B2545">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%23FF7A1A'/><text x='32' y='44' font-size='34' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>T</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0B2545;
+    --navy-2: #13315C;
+    --navy-soft: #3B4F6B;
+    --muted: #6B7A90;
+    --orange: #FF7A1A;
+    --orange-dark: #E8650A;
+    --orange-light: #FFF1E6;
+    --line: #E6EAF0;
+    --bg-soft: #F6F8FB;
+    --green: #16A34A;
+    --green-bg: #E8F7EE;
+    --red: #C2410C;
+    --red-bg: #FFF0E8;
+    --c-hotel: #13315C;
+    --c-transport: #3E7CB1;
+    --c-activities: #FF7A1A;
+    --c-food: #FFB577;
+    --radius: 18px;
+    --shadow-sm: 0 2px 8px rgba(11, 37, 69, 0.06);
+    --shadow: 0 12px 32px rgba(11, 37, 69, 0.09);
+    --shadow-lg: 0 24px 60px rgba(11, 37, 69, 0.16);
+    --ease: cubic-bezier(.2, .8, .2, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+  body {
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    color: var(--navy); background: #fff; line-height: 1.55;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  h1, h2, h3, h4, .logo, .display { font-family: "Plus Jakarta Sans", "Inter", sans-serif; letter-spacing: -0.025em; }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+  button { font-family: inherit; }
+  .container { width: min(1180px, 92%); margin: 0 auto; }
+  section { padding: 96px 0; position: relative; }
+  .section-head { text-align: center; max-width: 640px; margin: 0 auto 48px; }
+  .section-head h2 { font-size: clamp(1.8rem, 3.4vw, 2.6rem); line-height: 1.15; margin-bottom: 12px; }
+  .section-head p { color: var(--muted); font-size: 1.05rem; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 6px; font-size: .76rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--orange-dark); background: var(--orange-light);
+    padding: 6px 12px; border-radius: 999px; margin-bottom: 16px;
+  }
+  .hl { color: var(--orange); position: relative; white-space: nowrap; }
+  .hl svg { position: absolute; left: 0; bottom: -10px; width: 100%; height: 14px; }
+
+  /* Reveal on scroll */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; } * { animation: none !important; transition: none !important; } }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font: 600 .95rem "Inter", sans-serif; border: none; cursor: pointer; white-space: nowrap;
+    border-radius: 12px; padding: 12px 22px; transition: background .2s, transform .15s, box-shadow .2s, border-color .2s, color .2s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-orange { background: var(--orange); color: #fff; box-shadow: 0 8px 20px rgba(255, 122, 26, .32); }
+  .btn-orange:hover { background: var(--orange-dark); box-shadow: 0 10px 24px rgba(255, 122, 26, .42); }
+  .btn-outline { background: #fff; color: var(--navy); border: 1.5px solid var(--line); }
+  .btn-outline:hover { border-color: var(--navy); }
+  .btn-ghost { background: transparent; color: var(--navy); }
+  .btn-ghost:hover { background: var(--bg-soft); }
+  .btn-small { padding: 8px 14px; font-size: .85rem; border-radius: 10px; }
+  .btn-block { width: 100%; }
+  .btn svg { width: 16px; height: 16px; }
+
+  /* 1. Top menu */
+  header {
+    position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.85);
+    backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid transparent; transition: border-color .3s, box-shadow .3s;
+  }
+  header.scrolled { border-color: var(--line); box-shadow: var(--shadow-sm); }
+  .nav { display: flex; align-items: center; height: 72px; gap: 24px; }
+  .logo { font-size: 1.45rem; font-weight: 800; display: flex; align-items: center; gap: 9px; }
+  .logo-mark {
+    width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--orange), #FF9A4D); color: #fff;
+    display: grid; place-items: center; box-shadow: 0 4px 12px rgba(255,122,26,.35);
+  }
+  .logo-mark svg { width: 19px; height: 19px; }
+  .logo .accent { color: var(--orange); }
+  .nav-links { display: flex; gap: 6px; list-style: none; font-weight: 500; color: var(--navy-soft); margin: 0 auto; }
+  .nav-links a { padding: 8px 14px; border-radius: 10px; transition: background .2s, color .2s; font-size: .95rem; }
+  .nav-links a:hover { background: var(--bg-soft); color: var(--navy); }
+  .nav-links a.active { color: var(--orange-dark); }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .menu-toggle { display: none; background: none; border: none; width: 40px; height: 40px; border-radius: 10px; color: var(--navy); cursor: pointer; }
+  .menu-toggle svg { width: 24px; height: 24px; }
+
+  /* 2. Hero */
+  .hero { padding: 56px 0 0; overflow: hidden; }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background:
+      radial-gradient(600px 400px at 90% 0%, #FFE4CF 0, transparent 70%),
+      radial-gradient(500px 400px at 0% 100%, #E3EDFA 0, transparent 70%);
+  }
+  .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; }
+  .hero h1 { font-size: clamp(2.5rem, 5.6vw, 4.3rem); line-height: 1.04; margin-bottom: 22px; font-weight: 800; }
+  .hero-sub { font-size: 1.15rem; color: var(--muted); max-width: 520px; margin-bottom: 30px; }
+  .hero-stats { display: flex; gap: 36px; flex-wrap: wrap; }
+  .hero-stats div strong { display: block; font: 800 1.7rem "Plus Jakarta Sans", sans-serif; }
+  .hero-stats div span { color: var(--muted); font-size: .88rem; }
+  .collage { position: relative; height: 470px; }
+  .collage .ph { position: absolute; border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-lg); background: var(--navy-2); }
+  .collage .ph img { width: 100%; height: 100%; object-fit: cover; }
+  .collage .p1 { left: 8%; top: 0; width: 58%; height: 72%; transform: rotate(-3deg); animation: float 7s ease-in-out infinite; }
+  .collage .p2 { right: 0; top: 14%; width: 42%; height: 46%; transform: rotate(4deg); animation: float 8s ease-in-out infinite reverse; }
+  .collage .p3 { right: 8%; bottom: 0; width: 46%; height: 40%; transform: rotate(-2deg); animation: float 9s ease-in-out infinite; }
+  @keyframes float { 50% { translate: 0 -10px; } }
+  .chip {
+    position: absolute; background: #fff; border-radius: 14px; padding: 10px 14px; box-shadow: var(--shadow-lg);
+    display: flex; align-items: center; gap: 10px; font-size: .85rem; z-index: 2;
+  }
+  .chip b { display: block; font-size: .95rem; }
+  .chip small { color: var(--muted); }
+  .chip .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-size: 1.05rem; }
+  .chip-1 { left: 0; bottom: 18%; animation: float 6s ease-in-out infinite; }
+  .chip-1 .ic { background: var(--green-bg); }
+  .chip-2 { right: 2%; top: 0; animation: float 7s ease-in-out infinite reverse; }
+  .chip-2 .ic { background: var(--orange-light); }
+
+  /* Search box */
+  .search-wrap { position: relative; z-index: 3; margin-top: 52px; padding-bottom: 60px; }
+  .search-box {
+    background: #fff; border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow-lg);
+    padding: 28px; display: grid; gap: 24px; grid-template-columns: 1.35fr 1.25fr .75fr;
+  }
+  .field > label, .field .label { display: flex; align-items: center; gap: 6px; font-size: .76rem; font-weight: 700; color: var(--navy-soft); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; }
+  .field input[type="date"], .field input[type="number"], .field input[type="text"], .field input[type="email"] {
+    width: 100%; padding: 12px 13px; border: 1.5px solid var(--line); border-radius: 12px;
+    font: 500 .95rem "Inter", sans-serif; color: var(--navy); background: #fff; transition: border-color .2s, box-shadow .2s;
+  }
+  .field input:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 4px rgba(255,122,26,.12); }
+  .budget-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+  .budget-value { font: 800 2rem "Plus Jakarta Sans", sans-serif; color: var(--navy); line-height: 1; }
+  .budget-hint { font-size: .82rem; color: var(--muted); }
+  input[type="range"] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 999px; outline: none; cursor: pointer;
+    background: linear-gradient(to right, var(--orange) 0%, var(--orange) var(--fill, 45%), var(--line) var(--fill, 45%));
+  }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 6px solid var(--orange); box-shadow: 0 3px 10px rgba(255,122,26,.4); transition: transform .15s; }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+  input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 6px solid var(--orange); box-shadow: 0 3px 10px rgba(255,122,26,.4); }
+  .presets { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
+  .preset { border: 1px solid var(--line); background: var(--bg-soft); border-radius: 8px; padding: 4px 10px; font-size: .8rem; font-weight: 600; color: var(--navy-soft); cursor: pointer; transition: all .15s; }
+  .preset:hover, .preset.active { background: var(--orange-light); color: var(--orange-dark); border-color: #FFD4B3; }
+  .dates { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .dates small { display: block; font-size: .74rem; color: var(--muted); margin-bottom: 4px; }
+  .nights-note { margin-top: 10px; font-size: .84rem; color: var(--muted); }
+  .nights-note b { color: var(--navy); }
+  .stepper { display: flex; align-items: center; border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; background: #fff; }
+  .stepper button { background: var(--bg-soft); border: none; width: 44px; height: 46px; font-size: 1.25rem; color: var(--navy); cursor: pointer; transition: background .15s; flex-shrink: 0; }
+  .stepper button:hover { background: var(--orange-light); color: var(--orange-dark); }
+  .stepper input { border: none !important; text-align: center; border-radius: 0 !important; -moz-appearance: textfield; font-weight: 700 !important; font-size: 1.05rem !important; min-width: 0; box-shadow: none !important; }
+  .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .people-icons { margin-top: 10px; font-size: .95rem; letter-spacing: 1px; min-height: 22px; color: var(--navy-soft); }
+  .vibe-row { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px; border-top: 1px solid var(--line); padding-top: 24px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag {
+    border: 1.5px solid var(--line); background: #fff; color: var(--navy-soft); border-radius: 999px;
+    padding: 9px 16px; font: 600 .9rem "Inter", sans-serif; cursor: pointer; transition: all .18s var(--ease);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .tag:hover { border-color: var(--navy); color: var(--navy); }
+  .tag.active { background: var(--navy); border-color: var(--navy); color: #fff; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(11,37,69,.2); }
+  .find-btn { padding: 16px 34px; font-size: 1.05rem; border-radius: 14px; }
+  .find-btn .spin { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; display: none; }
+  .find-btn.loading .spin { display: inline-block; }
+  .find-btn.loading .arrow { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .form-error { grid-column: 1 / -1; color: var(--red); font-size: .88rem; display: none; background: var(--red-bg); padding: 10px 14px; border-radius: 10px; }
+
+  /* Partners strip */
+  .partners { padding: 30px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: #fff; }
+  .partners-inner { display: flex; align-items: center; justify-content: center; gap: 44px; flex-wrap: wrap; color: #9AA6B8; }
+  .partners-inner span.lbl { font-size: .82rem; color: var(--muted); font-weight: 500; }
+  .partners-inner b { font: 800 1.15rem "Plus Jakarta Sans", sans-serif; letter-spacing: -0.02em; }
+
+  /* 3. Results */
+  #explore { background: var(--bg-soft); }
+  .results-bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 26px; }
+  .results-meta { color: var(--navy-soft); font-size: .97rem; }
+  .results-meta b { color: var(--navy); }
+  .sort { display: flex; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 2px; }
+  .sort button { border: none; background: none; padding: 8px 14px; border-radius: 9px; font: 600 .85rem "Inter", sans-serif; color: var(--muted); cursor: pointer; transition: all .15s; }
+  .sort button.active { background: var(--navy); color: #fff; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+  .card {
+    background: #fff; border-radius: 22px; overflow: hidden; border: 1px solid var(--line);
+    box-shadow: var(--shadow-sm); display: flex; flex-direction: column; transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+    animation: cardIn .6s var(--ease) both;
+  }
+  .card:nth-child(2) { animation-delay: .08s; } .card:nth-child(3) { animation-delay: .16s; }
+  .card:nth-child(4) { animation-delay: .24s; } .card:nth-child(5) { animation-delay: .32s; } .card:nth-child(6) { animation-delay: .4s; }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+  .card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+  .card-img { position: relative; height: 210px; overflow: hidden; background: linear-gradient(135deg, var(--navy), #2E5A8A); }
+  .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease); }
+  .card:hover .card-img img { transform: scale(1.07); }
+  .card-img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,37,69,.55), transparent 50%); pointer-events: none; }
+  .card-img .fallback { position: absolute; inset: 0; display: none; place-items: center; color: #fff; font: 800 1.7rem "Plus Jakarta Sans", sans-serif; }
+  .fallback { display: none !important; }
+  .search-box > *, .dates > *, .field { min-width: 0; }
+  .field input[type="date"] { min-width: 0; -webkit-appearance: none; appearance: none; min-height: 46px; }
+  .img-city { position: absolute; left: 18px; bottom: 14px; z-index: 2; color: #fff; }
+  .img-city h3 { font-size: 1.5rem; line-height: 1.1; text-shadow: 0 2px 10px rgba(0,0,0,.25); }
+  .img-city span { font-size: .85rem; opacity: .92; }
+  .badge {
+    position: absolute; top: 14px; left: 14px; z-index: 2; background: #fff; color: var(--navy); font-size: .76rem; font-weight: 700;
+    padding: 6px 11px; border-radius: 999px; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  }
+  .badge.fit { color: var(--green); }
+  .badge.over { color: var(--red); }
+  .heart {
+    position: absolute; top: 12px; right: 12px; z-index: 2; width: 38px; height: 38px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,.92); display: grid; place-items: center; cursor: pointer; transition: transform .2s;
+  }
+  .heart:hover { transform: scale(1.1); }
+  .heart svg { width: 18px; height: 18px; fill: none; stroke: var(--navy); stroke-width: 2; transition: all .2s; }
+  .heart.on svg { fill: #EF4444; stroke: #EF4444; }
+  .heart.pop { animation: pop .35s var(--ease); }
+  @keyframes pop { 50% { transform: scale(1.3); } }
+  .card-body { padding: 20px 20px 22px; display: flex; flex-direction: column; flex: 1; }
+  .card-meta { display: flex; justify-content: space-between; align-items: center; font-size: .84rem; color: var(--muted); margin-bottom: 14px; gap: 8px; flex-wrap: wrap; }
+  .card-meta .rating { color: var(--navy); font-weight: 600; }
+  .card-meta .rating::before { content: "★ "; color: #F5A623; }
+  .price-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
+  .price-row strong { font: 800 1.75rem "Plus Jakarta Sans", sans-serif; line-height: 1; }
+  .price-row small { display: block; color: var(--muted); font-size: .78rem; margin-top: 4px; }
+  .pp { text-align: right; font-size: .82rem; color: var(--muted); }
+  .pp b { display: block; color: var(--orange-dark); font-size: 1.05rem; }
+  .bar { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: var(--line); margin-bottom: 6px; }
+  .bar i { display: block; height: 100%; transition: width .8s var(--ease); }
+  .bar-label { font-size: .76rem; color: var(--muted); margin-bottom: 14px; }
+  .breakdown { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin-bottom: 18px; flex: 1; align-content: start; }
+  .breakdown li { display: flex; justify-content: space-between; align-items: center; font-size: .88rem; color: var(--navy-soft); }
+  .breakdown li span { display: flex; align-items: center; gap: 7px; }
+  .breakdown li span::before { content: ""; width: 8px; height: 8px; border-radius: 3px; background: var(--dot); }
+  .breakdown b { color: var(--navy); font-weight: 600; }
+  .vibes-mini { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .vibes-mini span { font-size: .72rem; font-weight: 600; background: var(--bg-soft); color: var(--navy-soft); padding: 4px 9px; border-radius: 999px; }
+  .vibes-mini span.match { background: var(--orange-light); color: var(--orange-dark); }
+  .show-more { text-align: center; margin-top: 34px; }
+  .empty { grid-column: 1 / -1; text-align: center; padding: 50px 20px; color: var(--muted); }
+  .skeleton { background: #fff; border-radius: 22px; border: 1px solid var(--line); overflow: hidden; }
+  .skeleton .s-img, .skeleton .s-line { background: linear-gradient(90deg, #EEF1F5 25%, #F7F9FB 50%, #EEF1F5 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+  .skeleton .s-img { height: 210px; }
+  .skeleton .s-body { padding: 20px; display: grid; gap: 12px; }
+  .skeleton .s-line { height: 14px; border-radius: 6px; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  /* How it works */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; position: relative; }
+  .step { padding: 32px 28px; border-radius: var(--radius); border: 1px solid var(--line); background: #fff; position: relative; transition: transform .3s var(--ease), box-shadow .3s; }
+  .step:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .step-icon { width: 54px; height: 54px; border-radius: 16px; background: var(--orange-light); display: grid; place-items: center; font-size: 1.5rem; margin-bottom: 20px; }
+  .step-num { position: absolute; top: 24px; right: 26px; font: 800 3rem "Plus Jakarta Sans", sans-serif; color: var(--bg-soft); line-height: 1; }
+  .step h3 { font-size: 1.18rem; margin-bottom: 8px; }
+  .step p { color: var(--muted); font-size: .95rem; }
+
+  /* Split costs section */
+  #split { background: var(--navy); color: #fff; overflow: hidden; }
+  #split::before { content: ""; position: absolute; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(255,122,26,.18), transparent 70%); right: -150px; top: -150px; }
+  #split .section-head p { color: #B8C4D6; }
+  #split .eyebrow { background: rgba(255,122,26,.15); color: #FFB577; }
+  .split-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; position: relative; }
+  .check-list { list-style: none; display: grid; gap: 16px; }
+  .check-list li { display: flex; gap: 12px; align-items: flex-start; }
+  .check-list li::before { content: "✓"; flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--orange); color: #fff; display: grid; place-items: center; font-size: .8rem; font-weight: 700; margin-top: 1px; }
+  #split .check-list li { color: #D5DEEA; }
+  .split-calc { background: #fff; color: var(--navy); border-radius: 24px; padding: 30px; box-shadow: 0 30px 80px rgba(0,0,0,.3); }
+  .split-calc h3 { margin-bottom: 20px; font-size: 1.2rem; }
+  .split-calc .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  .avatars { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .av { display: flex; align-items: center; gap: 8px; background: var(--bg-soft); border-radius: 999px; padding: 4px 12px 4px 4px; font-size: .85rem; font-weight: 600; animation: cardIn .3s var(--ease) both; }
+  .av i { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-style: normal; font-size: .75rem; }
+  .split-result { background: var(--orange-light); border-radius: 16px; padding: 18px; text-align: center; }
+  .split-result span { font-size: .9rem; color: var(--navy-soft); }
+  .split-result strong { display: block; font: 800 2.3rem "Plus Jakarta Sans", sans-serif; color: var(--orange-dark); }
+
+  /* 5. Premium */
+  .plans { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; max-width: 900px; margin: 0 auto; }
+  .plan { border: 1.5px solid var(--line); border-radius: 24px; padding: 36px; display: flex; flex-direction: column; background: #fff; transition: transform .3s var(--ease), box-shadow .3s; }
+  .plan:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .plan.premium { border: none; background: linear-gradient(160deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; }
+  .plan.premium::after { content: ""; position: absolute; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(255,122,26,.25), transparent 70%); right: -100px; top: -100px; pointer-events: none; }
+  .plan .tagline { display: inline-block; font-size: .74rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .plan.premium .tagline { color: #FFB577; }
+  .plan h3 { font-size: 1.4rem; }
+  .plan .amount { font: 800 2.9rem "Plus Jakarta Sans", sans-serif; margin: 14px 0 4px; line-height: 1; }
+  .plan .amount small { font-size: 1rem; color: var(--muted); font-weight: 500; }
+  .plan.premium .amount small { color: #B8C4D6; }
+  .plan p.desc { color: var(--muted); margin: 8px 0 24px; }
+  .plan.premium p.desc { color: #B8C4D6; }
+  .plan ul { list-style: none; display: grid; gap: 14px; margin-bottom: 30px; flex: 1; }
+  .plan li { display: flex; gap: 12px; align-items: center; }
+  .plan li::before { content: "✓"; flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--orange-light); color: var(--orange-dark); display: grid; place-items: center; font-size: .75rem; font-weight: 700; }
+  .plan.premium li::before { background: var(--orange); color: #fff; }
+  .plan li.off { color: #A0AABB; }
+  .plan li.off::before { content: "–"; background: var(--bg-soft); color: #A0AABB; }
+  .pop-badge { position: absolute; top: 22px; right: 22px; background: var(--orange); color: #fff; font-size: .74rem; font-weight: 700; padding: 5px 12px; border-radius: 999px; z-index: 1; }
+  .plan-note { text-align: center; margin-top: 22px; color: var(--muted); font-size: .88rem; }
+
+  /* 6. Community */
+  #community { background: var(--bg-soft); }
+  .community-card .card-img { height: 180px; }
+  .user { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: .86rem; color: var(--muted); }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: .85rem; flex-shrink: 0; }
+  .user b { color: var(--navy); display: block; }
+  .stars { color: #F5A623; letter-spacing: 1px; font-size: .95rem; }
+  .quote { font-size: .92rem; color: var(--navy-soft); font-style: italic; margin-bottom: 16px; flex: 1; }
+  .community-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--line); gap: 10px; }
+  .community-foot strong { font: 800 1.35rem "Plus Jakarta Sans", sans-serif; line-height: 1; }
+  .community-foot small { color: var(--muted); font-size: .78rem; }
+  .copied { background: var(--green) !important; box-shadow: none !important; }
+
+  /* FAQ */
+  .faq { max-width: 760px; margin: 0 auto; display: grid; gap: 12px; }
+  .faq details { border: 1px solid var(--line); border-radius: 16px; padding: 0 22px; background: #fff; transition: box-shadow .2s; }
+  .faq details[open] { box-shadow: var(--shadow); }
+  .faq summary { cursor: pointer; list-style: none; padding: 20px 0; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; font-size: 1.4rem; color: var(--orange); transition: transform .25s; flex-shrink: 0; }
+  .faq details[open] summary::after { transform: rotate(45deg); }
+  .faq details p { color: var(--muted); padding-bottom: 20px; }
+
+  /* CTA band */
+  .cta { padding: 0 0 96px; }
+  .cta-box { border-radius: 28px; padding: 56px; background: linear-gradient(120deg, var(--orange) 0%, #FF9A4D 100%); color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 30px; flex-wrap: wrap; position: relative; overflow: hidden; }
+  .cta-box::before { content: "✈"; position: absolute; right: 30%; top: -30px; font-size: 12rem; opacity: .08; transform: rotate(-20deg); }
+  .cta-box h2 { font-size: clamp(1.6rem, 3vw, 2.3rem); max-width: 560px; line-height: 1.15; }
+  .cta-box p { opacity: .92; margin-top: 8px; }
+  .btn-white { background: #fff; color: var(--orange-dark); box-shadow: 0 8px 20px rgba(0,0,0,.12); }
+  .btn-white:hover { background: var(--navy); color: #fff; }
+
+  /* 7. Footer */
+  footer { padding: 64px 0 28px; background: var(--navy); color: #B8C4D6; }
+  footer .logo { color: #fff; }
+  .foot-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.4fr; gap: 40px; }
+  .foot-grid h4 { color: #fff; font-size: .95rem; margin-bottom: 16px; }
+  .foot-grid ul { list-style: none; display: grid; gap: 10px; font-size: .93rem; }
+  .foot-grid a:hover { color: var(--orange); }
+  .foot-about { margin: 16px 0 20px; font-size: .93rem; max-width: 300px; }
+  .socials { display: flex; gap: 10px; }
+  .socials a { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,.08); display: grid; place-items: center; color: #fff; transition: all .2s; }
+  .socials a:hover { background: var(--orange); transform: translateY(-2px); }
+  .socials svg { width: 17px; height: 17px; fill: currentColor; }
+  .newsletter { display: flex; gap: 8px; margin-top: 4px; }
+  .newsletter input { flex: 1; min-width: 0; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06); color: #fff; font: 500 .9rem "Inter", sans-serif; }
+  .newsletter input::placeholder { color: #8796AD; }
+  .newsletter input:focus { outline: none; border-color: var(--orange); }
+  .foot-bottom { margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.1); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: .85rem; }
+  .gdpr { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* 4. Modal */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(11, 37, 69, .6); backdrop-filter: blur(4px); z-index: 100;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .overlay.open { display: flex; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  .modal { background: #fff; border-radius: 26px; width: min(820px, 100%); max-height: 92vh; overflow-y: auto; box-shadow: 0 40px 100px rgba(0,0,0,.35); animation: up .35s var(--ease); overscroll-behavior: contain; }
+  @keyframes up { from { transform: translateY(30px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
+  .modal-hero { position: relative; height: 220px; background: var(--navy-2); }
+  .modal-hero img { width: 100%; height: 100%; object-fit: cover; }
+  .modal-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,37,69,.85), rgba(11,37,69,.1) 60%); }
+  .modal-hero .mh-text { position: absolute; left: 30px; right: 30px; bottom: 22px; color: #fff; z-index: 2; }
+  .modal-hero h2 { font-size: 2rem; line-height: 1.1; }
+  .modal-hero p { opacity: .9; font-size: .93rem; margin-top: 4px; }
+  .close { position: absolute; top: 16px; right: 16px; z-index: 3; background: rgba(255,255,255,.95); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.4rem; cursor: pointer; color: var(--navy); display: grid; place-items: center; transition: transform .2s; }
+  .close:hover { transform: rotate(90deg); }
+  .modal-body { padding: 26px 30px 30px; display: grid; gap: 20px; }
+  .summary-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .summary-pills span { background: var(--bg-soft); border-radius: 999px; padding: 6px 12px; font-size: .82rem; font-weight: 600; color: var(--navy-soft); }
+  .hotel-box { display: flex; gap: 16px; align-items: center; border: 1px solid var(--line); border-radius: 18px; padding: 16px; }
+  .hotel-thumb { width: 64px; height: 64px; border-radius: 14px; background: var(--orange-light); display: grid; place-items: center; font-size: 1.8rem; flex-shrink: 0; }
+  .hotel-info { flex: 1; min-width: 0; }
+  .hotel-info .label { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--orange-dark); font-weight: 700; }
+  .hotel-info strong { display: block; font-size: 1.08rem; }
+  .hotel-info small { color: var(--muted); }
+  .day-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--line); }
+  .day-tabs button { border: none; background: none; padding: 10px 16px; font: 700 .95rem "Plus Jakarta Sans", sans-serif; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; transition: all .2s; }
+  .day-tabs button.active { color: var(--navy); border-color: var(--orange); }
+  .timeline { position: relative; padding-left: 26px; display: grid; gap: 14px; }
+  .timeline::before { content: ""; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 2px; background: var(--line); }
+  .activity { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; background: var(--bg-soft); animation: cardIn .35s var(--ease) both; }
+  .activity:nth-child(2) { animation-delay: .06s; } .activity:nth-child(3) { animation-delay: .12s; }
+  .activity::before { content: ""; position: absolute; left: -25px; top: 50%; translate: 0 -50%; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid var(--orange); }
+  .activity .time { font-size: .74rem; color: var(--orange-dark); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+  .activity strong { display: block; font-weight: 600; font-size: .98rem; }
+  .activity small { color: var(--muted); }
+  .activity .act-price { font-size: .8rem; color: var(--navy-soft); font-weight: 600; margin-top: 2px; }
+  .partner-note { font-size: .76rem; color: var(--muted); text-align: center; }
+  .modal-cost { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; }
+  .cost-box { border: 1px solid var(--line); border-radius: 18px; padding: 18px; }
+  .cost-box h4 { font-size: 1rem; margin-bottom: 12px; }
+  .cost-box .breakdown { margin: 12px 0 0; grid-template-columns: 1fr; }
+  .split-box { border: 2px dashed var(--orange); background: var(--orange-light); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+  .split-box h4 { font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+  .split-box .stepper { background: #fff; width: 150px; }
+  .split-box .stepper input { width: 50px; padding: 10px 0; font: 700 1rem "Inter", sans-serif; color: var(--navy); }
+  .split-line { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+  .split-amount strong { display: block; font: 800 2rem "Plus Jakarta Sans", sans-serif; color: var(--orange-dark); line-height: 1; }
+  .split-amount small { color: var(--navy-soft); font-size: .8rem; }
+  .split-faces { display: flex; }
+  .split-faces i { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--orange-light); margin-left: -8px; display: grid; place-items: center; color: #fff; font-style: normal; font-size: .7rem; font-weight: 700; }
+  .split-faces i:first-child { margin-left: 0; }
+
+  /* Login modal */
+  .login { width: min(420px, 100%); padding: 34px 30px 30px; position: relative; }
+  .login .close { background: var(--bg-soft); }
+  .login h2 { font-size: 1.6rem; }
+  .login > p { color: var(--muted); margin: 4px 0 22px; }
+  .login form { display: grid; gap: 12px; }
+  .login .alt { text-align: center; font-size: .88rem; color: var(--muted); margin-top: 6px; }
+  .login .alt a { color: var(--orange-dark); font-weight: 600; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 140px); background: var(--navy); color: #fff;
+    padding: 14px 20px; border-radius: 14px; font-weight: 500; font-size: .93rem; z-index: 200; display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.25); transition: transform .4s var(--ease), opacity .3s; max-width: 92%; opacity: 0; pointer-events: none;
+  }
+  .toast.show { transform: translate(-50%, 0); opacity: 1; }
+  .toast::before { content: "✓"; width: 22px; height: 22px; border-radius: 50%; background: var(--orange); display: grid; place-items: center; font-size: .75rem; font-weight: 700; flex-shrink: 0; }
+
+  /* Responsive */
+  @media (max-width: 1020px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .collage { height: 380px; max-width: 560px; margin: 0 auto; width: 100%; }
+    .hero-text { text-align: center; }
+    .hero-sub { margin-left: auto; margin-right: auto; }
+    .hero-stats { justify-content: center; }
+    .search-box { grid-template-columns: 1fr 1fr; }
+    .search-box .field:first-child { grid-column: 1 / -1; }
+    .cards, .steps { grid-template-columns: 1fr 1fr; }
+    .split-panel { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 760px) {
+    section { padding: 68px 0; }
+    .nav { gap: 12px; }
+    .nav-links {
+      display: none; position: absolute; top: 72px; left: 0; right: 0; background: #fff; flex-direction: column;
+      gap: 0; border-bottom: 1px solid var(--line); padding: 10px 4% 16px; box-shadow: var(--shadow);
+    }
+    .nav-links.open { display: flex; }
+    .nav-links li a { display: block; padding: 13px 10px; }
+    .menu-toggle { display: grid; place-items: center; }
+    .nav-right { margin-left: auto; }
+    .hero { padding-top: 36px; }
+    .collage { height: 260px; }
+    .chip { font-size: .78rem; padding: 8px 10px; }
+    .search-box { grid-template-columns: 1fr; padding: 22px; }
+    .cards, .steps, .plans { grid-template-columns: 1fr; }
+    .vibe-row { flex-direction: column; align-items: stretch; }
+    .find-btn { width: 100%; }
+    .results-bar { flex-direction: column; align-items: flex-start; }
+    .modal-cost { grid-template-columns: 1fr; }
+    .hotel-box { flex-wrap: wrap; }
+    .hotel-box .btn, .activity .btn { width: 100%; }
+    .activity { flex-direction: column; align-items: flex-start; }
+    .modal-hero { height: 180px; }
+    .modal-body { padding: 22px 20px 24px; }
+    .cta-box { padding: 36px 26px; }
+    .foot-grid { grid-template-columns: 1fr; }
+    .partners-inner { gap: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 1. TOP MENU -->
+<header id="siteHeader">
+  <div class="container nav">
+    <a href="#top" class="logo" aria-label="TripSplit home">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></span>
+      <span>Trip<span class="accent">Split</span></span>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#explore">Explore</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#split">Split Costs</a></li>
+      <li><a href="#premium">Premium</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="btn btn-outline btn-small" id="loginBtn">Log in</button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<!-- 2. MAIN SEARCH -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-text reveal">
+        <span class="eyebrow">✦ Budget-first travel planner</span>
+        <h1>Set your budget.<br>We plan the <span class="hl">trip.<svg viewBox="0 0 200 14" preserveAspectRatio="none"><path d="M2 10 C 50 2, 150 2, 198 8" stroke="#FF7A1A" stroke-width="4" fill="none" stroke-linecap="round" opacity=".45"/></svg></span></h1>
+        <p class="hero-sub">Tell us how much you want to spend. We'll find complete trips you can actually afford: hotel, transport, activities and food, all included.</p>
+        <div class="hero-stats">
+          <div><strong data-count="14">0</strong><span>destinations</span></div>
+          <div><strong data-count="150" data-prefix="€">€0</strong><span>trips from</span></div>
+          <div><strong data-count="10">0</strong><span>friends per split</span></div>
+        </div>
+      </div>
+      <div class="collage reveal" aria-hidden="true">
+        <div class="ph p1"><img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=700&q=70" alt=""></div>
+        <div class="ph p2"><img src="https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=500&q=70" alt=""></div>
+        <div class="ph p3"><img src="https://images.unsplash.com/photo-1585208798174-6cedd86e019a?auto=format&fit=crop&w=500&q=70" alt=""></div>
+        <div class="chip chip-1"><span class="ic">✓</span><div><b>€450 under budget</b><small>Lisbon · 3 nights</small></div></div>
+        <div class="chip chip-2"><span class="ic">👥</span><div><b>€188 each</b><small>split 4 ways</small></div></div>
+      </div>
+    </div>
+
+    <div class="search-wrap reveal">
+      <form class="search-box" id="searchForm" novalidate>
+        <div class="field">
+          <label for="budget">💶 Total budget</label>
+          <div class="budget-top">
+            <span class="budget-value" id="budgetValue">€1,200</span>
+            <span class="budget-hint">€150 – €2,500</span>
+          </div>
+          <input type="range" id="budget" min="150" max="2500" step="50" value="1200" aria-label="Total budget in euros">
+          <div class="presets" id="presets">
+            <button type="button" class="preset" data-v="300">€300</button>
+            <button type="button" class="preset" data-v="600">€600</button>
+            <button type="button" class="preset active" data-v="1200">€1,200</button>
+            <button type="button" class="preset" data-v="2000">€2,000</button>
+          </div>
+        </div>
+        <div class="field">
+          <span class="label">📅 Dates</span>
+          <div class="dates">
+            <div><small>Start</small><input type="date" id="startDate" aria-label="Start date"></div>
+            <div><small>End</small><input type="date" id="endDate" aria-label="End date"></div>
+          </div>
+          <p class="nights-note" id="nightsNote"><b>3 nights</b> away</p>
+        </div>
+        <div class="field">
+          <label for="people">👥 People</label>
+          <div class="stepper">
+            <button type="button" data-step="-1" aria-label="Fewer people">−</button>
+            <input type="number" id="people" min="1" max="10" value="2">
+            <button type="button" data-step="1" aria-label="More people">+</button>
+          </div>
+          <div class="people-icons" id="peopleIcons"></div>
+        </div>
+        <p class="form-error" id="formError" role="alert"></p>
+        <div class="vibe-row">
+          <div class="field">
+            <span class="label">✨ Trip vibe <span style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--muted)">(pick any)</span></span>
+            <div class="tags" id="vibeTags">
+              <button type="button" class="tag" data-vibe="Beach" aria-pressed="false">🏖️ Beach</button>
+              <button type="button" class="tag" data-vibe="City" aria-pressed="false">🏙️ City</button>
+              <button type="button" class="tag" data-vibe="Adventure" aria-pressed="false">🧗 Adventure</button>
+              <button type="button" class="tag" data-vibe="Food" aria-pressed="false">🍝 Food</button>
+              <button type="button" class="tag" data-vibe="Party" aria-pressed="false">🎉 Party</button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-orange find-btn" id="findBtn"><span class="spin"></span>Find Trips <span class="arrow">→</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<div class="partners">
+  <div class="container partners-inner">
+    <span class="lbl">Book with trusted partners</span>
+    <b>Booking.com</b><b>GetYourGuide</b><b>Skyscanner</b><b>Hostelworld</b><b>Omio</b>
+  </div>
+</div>
+
+<!-- 3. TRIP RESULTS -->
+<section id="explore">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">🎯 Trips that fit</span>
+      <h2>Trips you can actually afford</h2>
+      <p>Every price is for the whole group: hotel, return transport, activities and food included. No surprises.</p>
+    </div>
+    <div class="results-bar">
+      <p class="results-meta" id="resultsMeta"></p>
+      <div class="sort" id="sortBar" role="tablist" aria-label="Sort trips">
+        <button class="active" data-sort="match">Best match</button>
+        <button data-sort="cheap">Cheapest</button>
+        <button data-sort="rating">Top rated</button>
+      </div>
+    </div>
+    <div class="cards" id="results"></div>
+    <div class="show-more" id="showMoreWrap"><button class="btn btn-outline" id="showMore">Show more trips</button></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">⚡ How it works</span>
+      <h2>From budget to boarding pass in three steps</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><span class="step-num">01</span><div class="step-icon">💶</div><h3>Set your budget</h3><p>Choose how much you want to spend, your dates, how many people are going and the vibe you're after.</p></div>
+      <div class="step reveal"><span class="step-num">02</span><div class="step-icon">🗺️</div><h3>Pick a trip</h3><p>We only show destinations that fit, with a clear breakdown of hotel, transport, activities and food.</p></div>
+      <div class="step reveal"><span class="step-num">03</span><div class="step-icon">🤝</div><h3>Book &amp; split</h3><p>Open the day-by-day plan, book with our partners and split the cost fairly with your friends.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SPLIT COSTS -->
+<section id="split">
+  <div class="container split-panel">
+    <div class="reveal">
+      <div class="section-head" style="text-align:left;margin:0 0 28px;">
+        <span class="eyebrow">💸 Split Costs</span>
+        <h2>No more awkward money talks</h2>
+        <p>Every trip comes with a built-in cost splitter, so everyone knows exactly what they owe before anyone books.</p>
+      </div>
+      <ul class="check-list">
+        <li>See the price per person on every plan</li>
+        <li>Change the group size and watch it update instantly</li>
+        <li>Track shared expenses during the trip with Premium</li>
+      </ul>
+    </div>
+    <div class="split-calc reveal">
+      <h3>Quick split calculator</h3>
+      <div class="row">
+        <div class="field">
+          <label for="calcTotal">Trip total (€)</label>
+          <input type="number" id="calcTotal" value="750" min="0">
+        </div>
+        <div class="field">
+          <label for="calcPeople">People</label>
+          <div class="stepper">
+            <button type="button" data-calc="-1" aria-label="Fewer people">−</button>
+            <input type="number" id="calcPeople" value="3" min="1" max="10">
+            <button type="button" data-calc="1" aria-label="More people">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="avatars" id="calcAvatars"></div>
+      <div class="split-result"><span>Each person pays</span><strong id="calcResult">€250</strong></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. FREE VS PREMIUM -->
+<section id="premium">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">💎 Plans</span>
+      <h2>Free to start. Premium when you travel more.</h2>
+      <p>Plan your first trip for free. Upgrade when your group needs more.</p>
+    </div>
+    <div class="plans">
+      <div class="plan reveal">
+        <span class="tagline">For first-timers</span>
+        <h3>Free</h3>
+        <div class="amount">€0 <small>/ forever</small></div>
+        <p class="desc">Everything you need to plan your first trip.</p>
+        <ul>
+          <li>Search by budget</li>
+          <li>Basic itineraries</li>
+          <li>Partner booking links</li>
+          <li class="off">Unlimited itinerary changes</li>
+          <li class="off">Flight price drop alerts</li>
+        </ul>
+        <a href="#top" class="btn btn-outline btn-block">Start planning</a>
+      </div>
+      <div class="plan premium reveal">
+        <span class="pop-badge">Most popular</span>
+        <span class="tagline">For frequent travellers</span>
+        <h3>TripSplit Premium</h3>
+        <div class="amount">€4.99 <small>/ month</small></div>
+        <p class="desc">For group trips and travellers who never stop.</p>
+        <ul>
+          <li>Unlimited itinerary changes</li>
+          <li>Flight price drop alerts</li>
+          <li>Offline access</li>
+          <li>Group expense tracker</li>
+          <li>Everything in Free</li>
+        </ul>
+        <button class="btn btn-orange btn-block" id="premiumBtn">Go Premium</button>
+      </div>
+    </div>
+    <p class="plan-note">Cancel anytime. Prices include VAT.</p>
+  </div>
+</section>
+
+<!-- 6. COMMUNITY TRIPS -->
+<section id="community">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">🌍 Community</span>
+      <h2>Popular budget trips from travellers</h2>
+      <p>Plans shared by the TripSplit community. Copy one and make it yours.</p>
+    </div>
+    <div class="cards" id="communityCards"></div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">❓ FAQ</span>
+      <h2>Questions, answered</h2>
+    </div>
+    <div class="faq reveal">
+      <details open><summary>How does TripSplit calculate the price?</summary><p>We add up a recommended hotel (shared rooms for groups), return transport per person, and an average daily spend on activities and food for the destination. The total is for the whole group.</p></details>
+      <details><summary>Do I book through TripSplit?</summary><p>No. We plan the trip and link you to trusted partner sites like Booking.com and GetYourGuide to book. Sometimes we earn a small commission, at no extra cost to you.</p></details>
+      <details><summary>Is TripSplit really free?</summary><p>Yes. Searching by budget, basic itineraries and partner links are free forever. Premium adds extras like unlimited changes, price alerts, offline access and a group expense tracker.</p></details>
+      <details><summary>How does splitting the cost work?</summary><p>Every plan has a "Split the Cost" box. Pick how many people are going and we divide the total so everyone knows their share before booking.</p></details>
+    </div>
+  </div>
+</section>
+
+<div class="cta">
+  <div class="container">
+    <div class="cta-box reveal">
+      <div>
+        <h2>Your next trip is closer than you think.</h2>
+        <p>Set a budget and see where it can take you in seconds.</p>
+      </div>
+      <a href="#top" class="btn btn-white find-btn">Plan my trip →</a>
+    </div>
+  </div>
+</div>
+</main>
+
+<!-- 7. FOOTER -->
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <a href="#top" class="logo">
+          <span class="logo-mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></span>
+          <span>Trip<span class="accent">Split</span></span>
+        </a>
+        <p class="foot-about">The budget-first travel planner. Set your budget, we plan the trip, you split the cost.</p>
+        <div class="socials">
+          <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.8.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-3.3-.1-4.8-1.7-4.9-4.9C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8C2.4 3.9 3.9 2.4 7.2 2.3 8.4 2.2 8.8 2.2 12 2.2zm0 4.7a5.1 5.1 0 100 10.2 5.1 5.1 0 000-10.2zm0 8.4a3.3 3.3 0 110-6.6 3.3 3.3 0 010 6.6zm5.3-9.8a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4z"/></svg></a>
+          <a href="https://tiktok.com" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M16.6 2h-3.4v13.4a2.9 2.9 0 11-2.9-2.9c.3 0 .6 0 .9.1V9.1a6.4 6.4 0 106 6.3V8.6a8 8 0 004.6 1.5V6.7A4.7 4.7 0 0116.6 2z"/></svg></a>
+          <a href="https://x.com" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.2 2.3h3.4l-7.4 8.4 8.7 11.5h-6.8l-5.3-7-6.1 7H1.3l7.9-9L.9 2.3h7l4.8 6.4 5.5-6.4zm-1.2 17.9h1.9L7 4.2H5l12 16z"/></svg></a>
+          <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 00.5 6.2 31 31 0 000 12a31 31 0 00.5 5.8 3 3 0 002.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 002.1-2.1A31 31 0 0024 12a31 31 0 00-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#" data-info="about">About us</a></li>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#premium">Premium</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#" data-info="privacy">Privacy / GDPR</a></li>
+          <li><a href="#" data-info="cookies">Cookies</a></li>
+          <li><a href="#" data-info="terms">Terms</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Get budget trip ideas</h4>
+        <p style="font-size:.9rem;margin-bottom:12px;">One email a month with the best deals. No spam.</p>
+        <form class="newsletter" id="newsletter">
+          <input type="email" placeholder="your@email.com" required aria-label="Email address">
+          <button class="btn btn-orange btn-small" type="submit">Join</button>
+        </form>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 TripSplit · Student project · Prices are example estimates.</span>
+      <a href="#" class="gdpr" data-info="privacy">🔒 GDPR compliant · We never sell your data</a>
+    </div>
+  </div>
+</footer>
+
+<!-- 4. ITINERARY POP-UP -->
+<div class="overlay" id="planOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="planTitle" style="position:relative">
+    <button class="close" data-close aria-label="Close">×</button>
+    <div class="modal-hero" id="planHero"></div>
+    <div class="modal-body" id="planBody"></div>
+  </div>
+</div>
+
+<!-- LOGIN POP-UP -->
+<div class="overlay" id="loginOverlay" aria-hidden="true">
+  <div class="modal login" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <button class="close" data-close aria-label="Close">×</button>
+    <h2 id="loginTitle">Welcome back 👋</h2>
+    <p>Log in to save your trips and split costs with friends.</p>
+    <form id="loginForm">
+      <div class="field"><input type="email" placeholder="Email" required aria-label="Email"></div>
+      <div class="field"><input type="text" placeholder="Password" required aria-label="Password" style="-webkit-text-security:disc"></div>
+      <button class="btn btn-orange btn-block" type="submit">Log in</button>
+      <p class="alt">New to TripSplit? <a href="#" id="signupLink">Create a free account</a></p>
+    </form>
+  </div>
+</div>
+
+<!-- INFO POP-UP (About / Privacy) -->
+<div class="overlay" id="infoOverlay" aria-hidden="true">
+  <div class="modal login" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <button class="close" data-close aria-label="Close">×</button>
+    <h2 id="infoTitle"></h2>
+    <p id="infoText" style="margin-bottom:0"></p>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =========================================================
+   DATA (example estimates)
+   transport  = return trip per person
+   hotel      = per room per night (2 people share a room)
+   activities = per person per day
+   food       = per person per day
+   ========================================================= */
+const IMG = (id, w = 800) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=70`;
+
+const TRIPS = [
+  { id: "lisbon", city: "Lisbon", country: "Portugal", flag: "🇵🇹", vibes: ["City", "Food", "Beach"], rating: 4.8, flight: "2h 30m",
+    img: "photo-1585208798174-6cedd86e019a", transport: 120, hotel: 70, activities: 20, food: 30,
+    hotelName: "Alfama Sunset Guesthouse", hotelStars: 3, hotelNote: "Rooftop terrace · breakfast included",
+    days: [
+      [["Morning", "Tram 28 & Alfama walking tour", "Free tour, tip-based", 0], ["Afternoon", "Pastéis de Belém & Belém Tower", "Classic custard tarts by the river", 12]],
+      [["Full day", "Sintra palaces day trip", "Pena Palace & Moorish Castle", 35], ["Evening", "Sunset at Senhora do Monte", "Best free view in the city", 0]],
+      [["Morning", "Train to Cascais beaches", "40 min from Cais do Sodré", 5], ["Evening", "Fado dinner in Bairro Alto", "Live traditional music", 30]]
+    ] },
+  { id: "prague", city: "Prague", country: "Czech Republic", flag: "🇨🇿", vibes: ["City", "Party", "Food"], rating: 4.7, flight: "2h 50m",
+    img: "photo-1541849546-216549ae216d", transport: 90, hotel: 55, activities: 15, food: 22,
+    hotelName: "Old Town Loft Rooms", hotelStars: 3, hotelNote: "5 min from Old Town Square",
+    days: [
+      [["Morning", "Old Town & Astronomical Clock", "Catch the hourly show", 0], ["Afternoon", "Charles Bridge to Lesser Town", "Street artists & river views", 0]],
+      [["Morning", "Prague Castle & St. Vitus", "Largest castle complex in the world", 18], ["Evening", "Czech craft beer tasting", "Local microbreweries", 25]],
+      [["Morning", "Vltava paddle boats", "Rent by the hour", 10], ["Night", "Traditional dinner & pub crawl", "Goulash, then the best bars", 20]]
+    ] },
+  { id: "marrakech", city: "Marrakech", country: "Morocco", flag: "🇲🇦", vibes: ["Adventure", "Food", "City"], rating: 4.6, flight: "3h 10m",
+    img: "photo-1597212618440-806262de4f6b", transport: 140, hotel: 45, activities: 25, food: 18,
+    hotelName: "Riad Dar Medina", hotelStars: 4, hotelNote: "Traditional riad with courtyard pool",
+    days: [
+      [["Morning", "Jardin Majorelle", "The iconic blue garden", 15], ["Evening", "Jemaa el-Fnaa food tour", "Street food & performers", 25]],
+      [["Full day", "Atlas Mountains & Berber villages", "Guided trip with lunch", 40], ["Evening", "Traditional hammam", "Moroccan spa ritual", 20]],
+      [["Morning", "Souks with a local guide", "Learn to haggle like a pro", 15], ["Afternoon", "Moroccan cooking class", "Make your own tagine", 30]]
+    ] },
+  { id: "budapest", city: "Budapest", country: "Hungary", flag: "🇭🇺", vibes: ["Party", "City", "Food"], rating: 4.7, flight: "3h 05m",
+    img: "photo-1565426873118-a17ed65d74b9", transport: 95, hotel: 50, activities: 18, food: 20,
+    hotelName: "Danube View Apartments", hotelStars: 3, hotelNote: "Self check-in · Jewish Quarter",
+    days: [
+      [["Morning", "Buda Castle & Fisherman's Bastion", "Best panorama of the city", 0], ["Night", "Ruin bar tour", "Szimpla Kert & friends", 15]],
+      [["Morning", "Széchenyi thermal baths", "Outdoor hot pools", 25], ["Evening", "Danube night cruise", "Parliament lit up", 18]],
+      [["Morning", "Great Market Hall tasting", "Lángos & paprika", 12], ["Afternoon", "Margaret Island bike ride", "Green escape in the river", 8]]
+    ] },
+  { id: "berlin", city: "Berlin", country: "Germany", flag: "🇩🇪", vibes: ["Party", "City"], rating: 4.5, flight: "2h 55m",
+    img: "photo-1560969184-10fe8719e047", transport: 95, hotel: 70, activities: 20, food: 25,
+    hotelName: "Kreuzberg Social Hotel", hotelStars: 3, hotelNote: "Trendy area · rooftop bar",
+    days: [
+      [["Morning", "Brandenburg Gate & Reichstag dome", "Free, book the dome online", 0], ["Afternoon", "East Side Gallery", "1.3 km of Berlin Wall art", 0]],
+      [["Morning", "Museum Island pass", "5 museums, one ticket", 24], ["Night", "Techno night in Friedrichshain", "The Berlin experience", 20]],
+      [["Morning", "Mauerpark flea market", "Sunday karaoke & vintage finds", 0], ["Afternoon", "Street food at Markthalle Neun", "Food from around the world", 15]]
+    ] },
+  { id: "athens", city: "Athens", country: "Greece", flag: "🇬🇷", vibes: ["City", "Food", "Beach"], rating: 4.6, flight: "3h 40m",
+    img: "photo-1555993539-1732b0258235", transport: 130, hotel: 60, activities: 22, food: 22,
+    hotelName: "Plaka Acropolis View", hotelStars: 3, hotelNote: "Acropolis view from the terrace",
+    days: [
+      [["Morning", "Acropolis & Parthenon", "Go early to beat the heat", 20], ["Evening", "Souvlaki crawl in Monastiraki", "Cheap and delicious", 12]],
+      [["Morning", "Ancient Agora & Plaka", "Walk through history", 10], ["Evening", "Sunset at Lycabettus Hill", "Best view in Athens", 0]],
+      [["Full day", "Riviera beaches", "Tram to Glyfada & Vouliagmeni", 15], ["Night", "Rooftop bars in Psyrri", "Cocktails with a view", 15]]
+    ] },
+  { id: "istanbul", city: "Istanbul", country: "Türkiye", flag: "🇹🇷", vibes: ["Food", "City", "Adventure"], rating: 4.7, flight: "4h 00m",
+    img: "photo-1524231757912-21f4fe3a7200", transport: 170, hotel: 50, activities: 20, food: 18,
+    hotelName: "Galata Tower Suites", hotelStars: 4, hotelNote: "Steps from Galata Tower",
+    days: [
+      [["Morning", "Hagia Sophia & Blue Mosque", "Two icons, one square", 25], ["Afternoon", "Grand Bazaar", "4,000 shops under one roof", 0]],
+      [["Morning", "Bosphorus ferry cruise", "Europe to Asia for €2", 2], ["Evening", "Kadıköy street food tour", "Meze, kebab & baklava", 30]],
+      [["Morning", "Turkish breakfast & Balat walk", "Colourful old houses", 10], ["Evening", "Traditional hammam", "Centuries-old bathhouse", 30]]
+    ] },
+  { id: "rome", city: "Rome", country: "Italy", flag: "🇮🇹", vibes: ["City", "Food"], rating: 4.8, flight: "2h 25m",
+    img: "photo-1552832230-c0197dd311b5", transport: 100, hotel: 80, activities: 28, food: 32,
+    hotelName: "Trastevere Charm Rooms", hotelStars: 3, hotelNote: "Cobbled streets, great food nearby",
+    days: [
+      [["Morning", "Colosseum & Roman Forum", "Skip-the-line ticket", 22], ["Evening", "Trevi Fountain & gelato", "Throw a coin, come back", 4]],
+      [["Morning", "Vatican Museums & Sistine Chapel", "Book ahead", 25], ["Evening", "Pasta making class", "Cacio e pepe from scratch", 40]],
+      [["Morning", "Pantheon & Piazza Navona", "Free and stunning", 5], ["Evening", "Aperitivo in Trastevere", "Spritz o'clock", 12]]
+    ] },
+  { id: "barcelona", city: "Barcelona", country: "Spain", flag: "🇪🇸", vibes: ["Beach", "Party", "City", "Food"], rating: 4.7, flight: "1h 20m",
+    img: "photo-1583422409516-2895a77efded", transport: 110, hotel: 85, activities: 25, food: 35,
+    hotelName: "Gothic Quarter Boutique Rooms", hotelStars: 3, hotelNote: "Walk to the beach & La Rambla",
+    days: [
+      [["Morning", "Sagrada Família", "Gaudí's masterpiece", 26], ["Afternoon", "Barceloneta beach", "Chiringuitos & sunshine", 0]],
+      [["Morning", "Park Güell", "Mosaics & city views", 10], ["Evening", "Tapas crawl in El Born", "4 bars, 8 tapas", 30]],
+      [["Morning", "Old town bike tour", "Gothic Quarter & Ciutadella", 25], ["Night", "Rooftop bar & club night", "Port Olímpic", 20]]
+    ] },
+  { id: "amsterdam", city: "Amsterdam", country: "Netherlands", flag: "🇳🇱", vibes: ["City", "Party"], rating: 4.6, flight: "2h 35m",
+    img: "photo-1534351590666-13e3e96b5017", transport: 120, hotel: 110, activities: 30, food: 35,
+    hotelName: "Canal House Studios", hotelStars: 3, hotelNote: "Right on the Jordaan canals",
+    days: [
+      [["Morning", "Canal cruise", "The city from the water", 18], ["Afternoon", "Jordaan & Nine Streets", "Boutiques & cafés", 0]],
+      [["Morning", "Rijksmuseum", "Rembrandt & Van Gogh's neighbours", 25], ["Afternoon", "Vondelpark by bike", "Ride like a local", 12]],
+      [["Morning", "Albert Cuyp market", "Stroopwafels, fresh & warm", 5], ["Night", "Brown cafés & live music", "Cosy Dutch bars", 15]]
+    ] },
+  { id: "dubrovnik", city: "Dubrovnik", country: "Croatia", flag: "🇭🇷", vibes: ["Beach", "Adventure"], rating: 4.8, flight: "2h 45m",
+    img: "photo-1555990793-da11153b2473", transport: 160, hotel: 90, activities: 30, food: 35,
+    hotelName: "Old Town Seaside Rooms", hotelStars: 4, hotelNote: "Inside the city walls · sea views",
+    days: [
+      [["Morning", "City walls walk", "2 km of views over the Adriatic", 35], ["Afternoon", "Banje beach", "Swim below the old town", 0]],
+      [["Morning", "Sea kayaking & snorkelling", "Paddle to Lokrum island", 40], ["Evening", "Cable car at sunset", "Mount Srđ panorama", 27]],
+      [["Full day", "Elaphiti islands boat trip", "Three islands, lunch included", 45], ["Evening", "Seafood dinner in the port", "Fresh catch of the day", 30]]
+    ] },
+  { id: "paris", city: "Paris", country: "France", flag: "🇫🇷", vibes: ["City", "Food"], rating: 4.6, flight: "2h 00m",
+    img: "photo-1502602898657-3e91760cbb34", transport: 110, hotel: 120, activities: 35, food: 40,
+    hotelName: "Montmartre Petit Hôtel", hotelStars: 3, hotelNote: "Near Sacré-Cœur, metro at the door",
+    days: [
+      [["Morning", "Eiffel Tower summit", "Book the stairs to save", 30], ["Evening", "Seine river cruise", "Paris by night", 17]],
+      [["Morning", "Louvre Museum", "Say hi to the Mona Lisa", 22], ["Afternoon", "Le Marais food walk", "Falafel, cheese & pastries", 35]],
+      [["Morning", "Montmartre & Sacré-Cœur", "Artists' square", 0], ["Evening", "Picnic at Champ de Mars", "Watch the tower sparkle", 15]]
+    ] },
+  { id: "santorini", city: "Santorini", country: "Greece", flag: "🇬🇷", vibes: ["Beach", "Food"], rating: 4.9, flight: "4h 10m",
+    img: "photo-1570077188670-e3a8d69ac5ff", transport: 190, hotel: 110, activities: 35, food: 40,
+    hotelName: "Oia Cave Houses", hotelStars: 4, hotelNote: "Caldera view · plunge pool",
+    days: [
+      [["Morning", "Fira to Oia hike", "10 km along the caldera", 0], ["Evening", "Oia sunset", "The world's most famous sunset", 0]],
+      [["Full day", "Catamaran cruise", "Hot springs, BBQ & swimming", 110], ["Evening", "Wine tasting at a local winery", "Volcanic Assyrtiko", 25]],
+      [["Morning", "Red Beach & Akrotiri", "Ancient Minoan town", 12], ["Afternoon", "Black sand beach in Perissa", "Sunbeds & cocktails", 10]]
+    ] },
+  { id: "reykjavik", city: "Reykjavík", country: "Iceland", flag: "🇮🇸", vibes: ["Adventure"], rating: 4.9, flight: "3h 50m",
+    img: "photo-1476610182048-b716b8518aae", transport: 260, hotel: 150, activities: 70, food: 55,
+    hotelName: "Harbour Northern Lights Inn", hotelStars: 3, hotelNote: "Downtown · aurora wake-up calls",
+    days: [
+      [["Full day", "Golden Circle tour", "Geysers, Gullfoss & Þingvellir", 70], ["Night", "Northern Lights hunt", "Best Sept to March", 60]],
+      [["Full day", "South Coast waterfalls", "Seljalandsfoss & black sand beach", 85], ["Evening", "Reykjavík hot dog & harbour walk", "The famous pylsur", 5]],
+      [["Morning", "Glacier hike", "Crampons included", 110], ["Afternoon", "Geothermal lagoon", "Warm water, cold air", 60]]
+    ] }
+];
+const POPULAR = ["lisbon", "prague", "marrakech", "budapest", "barcelona", "rome", "athens", "berlin", "istanbul", "amsterdam", "dubrovnik", "paris", "santorini", "reykjavik"];
+
+const COMMUNITY = [
+  { city: "Porto", country: "Portugal", user: "Maria", from: "Madrid", color: "#3E7CB1", days: 3, people: 2, total: 520, rating: 4.9, reviews: 214, vibe: "Food",
+    img: "photo-1555881400-74d7acaacd8b", quote: "Port wine cellars, river views and the best francesinha of my life. Came back with €40 to spare!" },
+  { city: "Cinque Terre", country: "Italy", user: "Tom", from: "London", color: "#FF7A1A", days: 4, people: 3, total: 840, rating: 4.8, reviews: 167, vibe: "Adventure",
+    img: "photo-1516483638261-f4dbaf036963", quote: "Hiked all five villages, swam every afternoon. Splitting the apartment three ways made it super cheap." },
+  { city: "Vienna", country: "Austria", user: "Lucía", from: "Valencia", color: "#16A34A", days: 3, people: 4, total: 960, rating: 4.7, reviews: 132, vibe: "City",
+    img: "photo-1516550893923-42d28e5677af", quote: "Palaces, coffee houses and schnitzel for four people at €240 each. TripSplit sorted the maths." }
+];
+
+const COLORS = { Hotel: "var(--c-hotel)", Transport: "var(--c-transport)", Activities: "var(--c-activities)", Food: "var(--c-food)" };
+const AVATAR_COLORS = ["#FF7A1A", "#3E7CB1", "#16A34A", "#9333EA", "#E11D48", "#0891B2", "#CA8A04", "#13315C", "#DB2777", "#65A30D"];
+
+/* ========================================================= HELPERS */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const euro = n => "€" + Math.round(n).toLocaleString("en-US");
+const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+const people = n => `${n} ${n === 1 ? "person" : "people"}`;
+
+let toastTimer;
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
+}
+function imgTag(id, alt, w) {
+  return `<img src="${IMG(id, w)}" alt="${alt}" loading="lazy" onerror="this.remove();">`;
+}
+let favs = new Set();
+try { favs = new Set(JSON.parse(localStorage.getItem("ts-favs") || "[]")); } catch (e) {}
+function saveFavs() { try { localStorage.setItem("ts-favs", JSON.stringify([...favs])); } catch (e) {} }
+
+/* ========================================================= STATE */
+const state = { budget: 1200, people: 2, nights: 3, vibes: [], sort: "match", limit: 3, searched: false };
+
+function tripCost(t, ppl, nights) {
+  const rooms = Math.ceil(ppl / 2);
+  const parts = {
+    Hotel: t.hotel * rooms * nights,
+    Transport: t.transport * ppl,
+    Activities: t.activities * ppl * nights,
+    Food: t.food * ppl * nights
+  };
+  return { parts, total: Object.values(parts).reduce((a, b) => a + b, 0) };
+}
+
+/* ========================================================= SEARCH FORM */
+const budgetInput = $("#budget");
+function syncBudget() {
+  state.budget = +budgetInput.value;
+  $("#budgetValue").textContent = euro(state.budget);
+  const pct = (state.budget - 150) / (2500 - 150) * 100;
+  budgetInput.style.setProperty("--fill", pct + "%");
+  $$(".preset").forEach(p => p.classList.toggle("active", +p.dataset.v === state.budget));
+}
+budgetInput.addEventListener("input", syncBudget);
+$$(".preset").forEach(p => p.addEventListener("click", () => { budgetInput.value = p.dataset.v; syncBudget(); }));
+
+const fmtDate = d => {
+  const z = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`;
+};
+function setDefaultDates() {
+  const start = new Date(); start.setDate(start.getDate() + 30);
+  const end = new Date(start); end.setDate(end.getDate() + 3);
+  $("#startDate").value = fmtDate(start);
+  $("#endDate").value = fmtDate(end);
+  $("#startDate").min = fmtDate(new Date());
+  $("#endDate").min = fmtDate(start);
+}
+function readNights() {
+  const s = new Date($("#startDate").value), e = new Date($("#endDate").value);
+  if (isNaN(s) || isNaN(e) || e <= s) return null;
+  return Math.round((e - s) / 86400000);
+}
+function syncNights() {
+  const n = readNights();
+  $("#nightsNote").innerHTML = n ? `<b>${plural(Math.min(n, 14), "night")}</b> away${n > 14 ? " (we plan up to 14)" : ""}` : `Pick an end date after the start`;
+}
+$("#startDate").addEventListener("change", e => {
+  $("#endDate").min = e.target.value;
+  if (new Date($("#endDate").value) <= new Date(e.target.value)) {
+    const d = new Date(e.target.value); d.setDate(d.getDate() + 3); $("#endDate").value = fmtDate(d);
+  }
+  syncNights();
+});
+$("#endDate").addEventListener("change", syncNights);
+
+function syncPeople() {
+  const n = clamp(+$("#people").value || 1, 1, 10);
+  $("#peopleIcons").textContent = "🧍".repeat(n);
+}
+$$("[data-step]").forEach(btn => btn.addEventListener("click", () => {
+  const input = $("#people");
+  input.value = clamp((+input.value || 1) + (+btn.dataset.step), 1, 10);
+  syncPeople();
+}));
+$("#people").addEventListener("input", syncPeople);
+$("#people").addEventListener("change", e => { e.target.value = clamp(+e.target.value || 1, 1, 10); syncPeople(); });
+
+$$("#vibeTags .tag").forEach(tag => tag.addEventListener("click", () => {
+  tag.classList.toggle("active");
+  tag.setAttribute("aria-pressed", tag.classList.contains("active"));
+}));
+
+$("#searchForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const err = $("#formError");
+  const n = readNights();
+  if (!n) { err.textContent = "Please choose an end date after the start date."; err.style.display = "block"; return; }
+  err.style.display = "none";
+  state.nights = clamp(n, 1, 14);
+  state.people = clamp(+$("#people").value || 1, 1, 10);
+  state.budget = +budgetInput.value;
+  state.vibes = $$("#vibeTags .tag.active").map(t => t.dataset.vibe);
+  state.limit = 3;
+  state.searched = true;
+
+  const btn = $("#findBtn");
+  btn.classList.add("loading");
+  showSkeletons();
+  document.getElementById("explore").scrollIntoView({ behavior: "smooth" });
+  setTimeout(() => { btn.classList.remove("loading"); renderResults(); }, 700);
+});
+
+/* ========================================================= RESULTS */
+function showSkeletons() {
+  $("#results").innerHTML = Array(3).fill(`<div class="skeleton"><div class="s-img"></div><div class="s-body"><div class="s-line" style="width:60%"></div><div class="s-line"></div><div class="s-line" style="width:80%"></div><div class="s-line" style="height:40px"></div></div></div>`).join("");
+}
+
+function getList() {
+  const { budget, people: ppl, nights, vibes } = state;
+  let list = TRIPS.map(t => ({ t, pop: POPULAR.indexOf(t.id), ...tripCost(t, ppl, nights), match: vibes.filter(v => t.vibes.includes(v)).length }));
+  if (vibes.length) list = list.filter(x => x.match > 0);
+  const fits = list.filter(x => x.total <= budget);
+  const over = list.filter(x => x.total > budget).sort((a, b) => a.total - b.total);
+  const sorters = {
+    match: (a, b) => b.match - a.match || a.pop - b.pop,
+    cheap: (a, b) => a.total - b.total,
+    rating: (a, b) => b.t.rating - a.t.rating || a.total - b.total
+  };
+  fits.sort(sorters[state.sort]);
+  return { fits, over, all: fits.concat(over) };
+}
+
+function renderResults() {
+  const { budget, people: ppl, nights, vibes } = state;
+  const { fits, all } = getList();
+  const shown = all.slice(0, state.limit);
+  const nightTxt = plural(nights, "night");
+
+  $("#resultsMeta").innerHTML = state.searched
+    ? `<b>${plural(fits.length, "trip")}</b> fit <b>${euro(budget)}</b> for ${people(ppl)}, ${nightTxt}${vibes.length ? " · " + vibes.join(", ") : ""}`
+    : `Example search: <b>${euro(budget)}</b> · ${people(ppl)} · ${nightTxt}`;
+
+  if (!shown.length) {
+    $("#results").innerHTML = `<div class="empty"><div style="font-size:2.5rem">🧭</div><p>No trips match those vibes yet. Try picking another vibe.</p></div>`;
+    $("#showMoreWrap").style.display = "none";
+    return;
+  }
+
+  $("#results").innerHTML = shown.map(x => {
+    const fit = x.total <= budget;
+    const pctOfBudget = Math.round(x.total / budget * 100);
+    const barScale = Math.min(1, x.total / budget);
+    return `
+    <article class="card">
+      <div class="card-img">
+        ${imgTag(x.t.img, x.t.city)}
+        <span class="badge ${fit ? "fit" : "over"}">${fit ? "✓ " + euro(budget - x.total) + " under budget" : "↑ " + euro(x.total - budget) + " over budget"}</span>
+        <button class="heart ${favs.has(x.t.id) ? "on" : ""}" data-fav="${x.t.id}" aria-label="Save ${x.t.city}"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.2 3.2 4.5 7 4.5c2.1 0 3.6 1.1 5 2.8 1.4-1.7 2.9-2.8 5-2.8 3.8 0 6 3.7 4.5 7.3C19.5 16.4 12 21 12 21z"/></svg></button>
+        <div class="img-city"><h3>${x.t.city}</h3><span>${x.t.flag} ${x.t.country}</span></div>
+      </div>
+      <div class="card-body">
+        <div class="card-meta"><span class="rating">${x.t.rating}</span><span>✈️ ${x.t.flight}</span><span>🌙 ${nightTxt}</span></div>
+        <div class="price-row">
+          <div><strong>${euro(x.total)}</strong><small>total for ${people(ppl)}</small></div>
+          <div class="pp"><b>${euro(x.total / ppl)}</b>per person</div>
+        </div>
+        <div class="bar" title="${pctOfBudget}% of your budget">
+          ${Object.entries(x.parts).map(([k, v]) => `<i style="width:${v / x.total * 100 * barScale}%;background:${COLORS[k]}"></i>`).join("")}
+        </div>
+        <div class="bar-label">${pctOfBudget}% of your budget</div>
+        <ul class="breakdown">
+          ${Object.entries(x.parts).map(([k, v]) => `<li style="--dot:${COLORS[k]}"><span>${k}</span><b>${euro(v)}</b></li>`).join("")}
+        </ul>
+        <div class="vibes-mini">${x.t.vibes.map(v => `<span class="${vibes.includes(v) ? "match" : ""}">${v}</span>`).join("")}</div>
+        <button class="btn btn-orange btn-block" data-plan="${x.t.id}">See Plan →</button>
+      </div>
+    </article>`;
+  }).join("");
+
+  $("#showMoreWrap").style.display = all.length > state.limit ? "block" : "none";
+  $("#showMore").textContent = `Show more trips (${all.length - state.limit})`;
+}
+
+$("#results").addEventListener("click", e => {
+  const fav = e.target.closest("[data-fav]");
+  if (fav) {
+    const id = fav.dataset.fav;
+    favs.has(id) ? favs.delete(id) : favs.add(id);
+    saveFavs();
+    fav.classList.toggle("on", favs.has(id));
+    fav.classList.remove("pop"); void fav.offsetWidth; fav.classList.add("pop");
+    const t = TRIPS.find(x => x.id === id);
+    toast(favs.has(id) ? `${t.city} saved to your favourites` : `${t.city} removed from favourites`);
+    return;
+  }
+  const plan = e.target.closest("[data-plan]");
+  if (plan) openPlan(plan.dataset.plan);
+});
+$("#showMore").addEventListener("click", () => { state.limit += 3; renderResults(); });
+$$("#sortBar button").forEach(b => b.addEventListener("click", () => {
+  $$("#sortBar button").forEach(x => x.classList.toggle("active", x === b));
+  state.sort = b.dataset.sort;
+  renderResults();
+}));
+
+/* ========================================================= ITINERARY MODAL */
+function partnerLinks(city) {
+  const q = encodeURIComponent(city);
+  return { hotel: `https://www.booking.com/searchresults.html?ss=${q}`, activity: `https://www.getyourguide.com/s/?q=${q}` };
+}
+
+function openPlan(id) {
+  const t = TRIPS.find(x => x.id === id);
+  const { total, parts } = tripCost(t, state.people, state.nights);
+  const links = partnerLinks(t.city);
+  let splitN = state.people;
+
+  $("#planHero").innerHTML = `${imgTag(t.img, t.city, 1000)}
+    <div class="mh-text"><h2 id="planTitle">${t.flag} Your ${t.city} plan</h2>
+    <p>${plural(state.nights, "night")} · ${people(state.people)} · ${euro(total)} total${state.nights > 3 ? " · 3-day highlights" : ""}</p></div>`;
+
+  $("#planBody").innerHTML = `
+    <div class="summary-pills"><span>★ ${t.rating} rated</span><span>✈️ ${t.flight} flight</span><span>${t.vibes.join(" · ")}</span></div>
+    <div class="hotel-box">
+      <div class="hotel-thumb">🏨</div>
+      <div class="hotel-info">
+        <div class="label">Recommended hotel</div>
+        <strong>${t.hotelName} <span style="color:#F5A623;font-size:.85rem">${"★".repeat(t.hotelStars)}</span></strong>
+        <small>${t.hotelNote} · ${euro(parts.Hotel)} for ${plural(state.nights, "night")}</small>
+      </div>
+      <a class="btn btn-orange btn-small" href="${links.hotel}" target="_blank" rel="sponsored noopener">Book on Partner Site ↗</a>
+    </div>
+    <div>
+      <div class="day-tabs" role="tablist">${t.days.map((_, i) => `<button role="tab" class="${i === 0 ? "active" : ""}" data-day="${i}">Day ${i + 1}</button>`).join("")}</div>
+      <div class="timeline" id="timeline" style="margin-top:18px"></div>
+    </div>
+    <p class="partner-note">Partner links (e.g. Booking.com, GetYourGuide) may earn TripSplit a small commission at no extra cost to you.</p>
+    <div class="modal-cost">
+      <div class="cost-box">
+        <h4>Where the money goes</h4>
+        <div class="bar">${Object.entries(parts).map(([k, v]) => `<i style="width:${v / total * 100}%;background:${COLORS[k]}"></i>`).join("")}</div>
+        <ul class="breakdown">${Object.entries(parts).map(([k, v]) => `<li style="--dot:${COLORS[k]}"><span>${k}</span><b>${euro(v)}</b></li>`).join("")}
+          <li style="border-top:1px solid var(--line);padding-top:8px"><span style="font-weight:700;color:var(--navy)">Total</span><b>${euro(total)}</b></li></ul>
+      </div>
+      <div class="split-box">
+        <h4>💸 Split the Cost</h4>
+        <div class="stepper">
+          <button type="button" data-split="-1" aria-label="Fewer people">−</button>
+          <input type="number" id="splitPeople" min="1" max="10" value="${splitN}" aria-label="People splitting">
+          <button type="button" data-split="1" aria-label="More people">+</button>
+        </div>
+        <div class="split-faces" id="splitFaces"></div>
+        <div class="split-line">
+          <div class="split-amount"><strong id="splitAmount"></strong><small id="splitLabel">per person</small></div>
+          <button class="btn btn-outline btn-small" id="copySplit">Copy</button>
+        </div>
+      </div>
+    </div>`;
+
+  const renderDay = i => {
+    $("#timeline").innerHTML = t.days[i].map(([time, name, note, price]) => `
+      <div class="activity">
+        <div><div class="time">${time}</div><strong>${name}</strong><small>${note}</small>
+          <div class="act-price">${price ? "from " + euro(price) + " pp" : "Free"}</div></div>
+        <a class="btn btn-outline btn-small" href="${links.activity}" target="_blank" rel="sponsored noopener">Book on Partner Site ↗</a>
+      </div>`).join("");
+    $$(".day-tabs button").forEach(b => b.classList.toggle("active", +b.dataset.day === i));
+  };
+  $$(".day-tabs button").forEach(b => b.addEventListener("click", () => renderDay(+b.dataset.day)));
+  renderDay(0);
+
+  const splitInput = $("#splitPeople");
+  const updateSplit = () => {
+    splitN = clamp(+splitInput.value || 1, 1, 10);
+    $("#splitAmount").textContent = euro(total / splitN);
+    $("#splitLabel").textContent = splitN === 1 ? "just you" : `each, split ${splitN} ways`;
+    $("#splitFaces").innerHTML = Array.from({ length: splitN }, (_, i) => `<i style="background:${AVATAR_COLORS[i]}">${String.fromCharCode(65 + i)}</i>`).join("");
+  };
+  $$("[data-split]").forEach(b => b.addEventListener("click", () => {
+    splitInput.value = clamp((+splitInput.value || 1) + (+b.dataset.split), 1, 10);
+    updateSplit();
+  }));
+  splitInput.addEventListener("input", updateSplit);
+  splitInput.addEventListener("change", () => { splitInput.value = splitN; });
+  $("#copySplit").addEventListener("click", async () => {
+    const text = `TripSplit · ${t.city} (${plural(state.nights, "night")}): ${euro(total)} total → ${euro(total / splitN)} each for ${people(splitN)}.`;
+    try { await navigator.clipboard.writeText(text); toast("Split summary copied. Paste it in your group chat!"); }
+    catch (e) { toast(text); }
+  });
+  updateSplit();
+
+  $("#planOverlay .modal").scrollTop = 0;
+  openOverlay("#planOverlay");
+}
+
+/* ========================================================= OVERLAYS */
+let lastFocus = null;
+function openOverlay(sel) {
+  lastFocus = document.activeElement;
+  const o = $(sel);
+  o.classList.add("open");
+  o.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  setTimeout(() => $(".close", o)?.focus(), 50);
+}
+function closeOverlays() {
+  $$(".overlay.open").forEach(o => { o.classList.remove("open"); o.setAttribute("aria-hidden", "true"); });
+  document.body.style.overflow = "";
+  lastFocus?.focus?.();
+}
+$$(".overlay").forEach(o => o.addEventListener("click", e => { if (e.target === o || e.target.closest("[data-close]")) closeOverlays(); }));
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeOverlays(); });
+
+const INFO = {
+  about: ["About us", "TripSplit is a student project built by travellers who were tired of planning trips they couldn't afford. We flip travel planning around: you start with your budget, and we show you where it can take you."],
+  privacy: ["Privacy & GDPR", "We only collect the data we need to plan your trips. We never sell your personal data, you can download or delete it at any time, and our partners only receive what's needed to complete a booking you choose to make."],
+  cookies: ["Cookies", "We use essential cookies to keep the site working and, only with your consent, analytics cookies to improve TripSplit. You can change your choice at any time."],
+  terms: ["Terms", "Prices on TripSplit are estimates to help you plan. Final prices are set by our booking partners at the time you book."]
+};
+$$("[data-info]").forEach(a => a.addEventListener("click", e => {
+  e.preventDefault();
+  const [title, text] = INFO[a.dataset.info];
+  $("#infoTitle").textContent = title;
+  $("#infoText").textContent = text;
+  openOverlay("#infoOverlay");
+}));
+
+/* ========================================================= COMMUNITY */
+function renderCommunity() {
+  $("#communityCards").innerHTML = COMMUNITY.map((c, i) => {
+    const full = Math.round(c.rating);
+    return `
+    <article class="card community-card reveal">
+      <div class="card-img">${imgTag(c.img, c.city, 700)}
+        <span class="badge">${plural(c.days, "day")} · ${people(c.people)}</span>
+        <div class="img-city"><h3>${c.city}</h3><span>${c.country}</span></div>
+      </div>
+      <div class="card-body">
+        <div class="user">
+          <span class="avatar" style="background:${c.color}">${c.user[0]}</span>
+          <div><b>${c.user}</b>from ${c.from}</div>
+          <div style="margin-left:auto;text-align:right"><span class="stars">${"★".repeat(full)}${"☆".repeat(5 - full)}</span><br><small>${c.rating} (${c.reviews})</small></div>
+        </div>
+        <p class="quote">"${c.quote}"</p>
+        <div class="community-foot">
+          <div><strong>${euro(c.total)}</strong><br><small>total · ${euro(c.total / c.people)} each</small></div>
+          <button class="btn btn-orange btn-small" data-copy="${i}">Copy this trip</button>
+        </div>
+      </div>
+    </article>`;
+  }).join("");
+
+  $$("[data-copy]").forEach(b => b.addEventListener("click", () => {
+    const c = COMMUNITY[+b.dataset.copy];
+    const budget = clamp(Math.ceil(c.total * 1.15 / 50) * 50, 150, 2500);
+    budgetInput.value = budget; syncBudget();
+    $("#people").value = c.people; syncPeople();
+    const start = new Date($("#startDate").value || Date.now());
+    const end = new Date(start); end.setDate(end.getDate() + c.days);
+    $("#endDate").value = fmtDate(end); syncNights();
+    $$("#vibeTags .tag").forEach(t => { const on = t.dataset.vibe === c.vibe; t.classList.toggle("active", on); t.setAttribute("aria-pressed", on); });
+    b.textContent = "✓ Copied"; b.classList.add("copied");
+    setTimeout(() => { b.textContent = "Copy this trip"; b.classList.remove("copied"); }, 2200);
+    toast(`${c.user}'s ${c.city} trip copied into your search. Hit Find Trips!`);
+    setTimeout(() => document.getElementById("top").scrollIntoView({ behavior: "smooth" }), 600);
+  }));
+}
+
+/* ========================================================= SPLIT CALCULATOR */
+function updateCalc() {
+  const total = Math.max(0, +$("#calcTotal").value || 0);
+  const ppl = clamp(+$("#calcPeople").value || 1, 1, 10);
+  $("#calcResult").textContent = euro(total / ppl);
+  $("#calcAvatars").innerHTML = Array.from({ length: ppl }, (_, i) => `<span class="av"><i style="background:${AVATAR_COLORS[i]}">${String.fromCharCode(65 + i)}</i>${euro(total / ppl)}</span>`).join("");
+}
+$("#calcTotal").addEventListener("input", updateCalc);
+$("#calcPeople").addEventListener("input", updateCalc);
+$("#calcPeople").addEventListener("change", e => { e.target.value = clamp(+e.target.value || 1, 1, 10); updateCalc(); });
+$$("[data-calc]").forEach(b => b.addEventListener("click", () => {
+  const i = $("#calcPeople"); i.value = clamp((+i.value || 1) + (+b.dataset.calc), 1, 10); updateCalc();
+}));
+
+/* ========================================================= MISC */
+const header = $("#siteHeader");
+addEventListener("scroll", () => header.classList.toggle("scrolled", scrollY > 10), { passive: true });
+
+const navLinks = $("#navLinks"), toggle = $("#menuToggle");
+toggle.addEventListener("click", () => { const open = navLinks.classList.toggle("open"); toggle.setAttribute("aria-expanded", open); });
+$$("#navLinks a").forEach(a => a.addEventListener("click", () => { navLinks.classList.remove("open"); toggle.setAttribute("aria-expanded", false); }));
+
+// highlight current section in menu
+const sections = ["explore", "how", "split", "premium"].map(id => document.getElementById(id));
+const navObs = new IntersectionObserver(entries => entries.forEach(en => {
+  if (en.isIntersecting) $$("#navLinks a").forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + en.target.id));
+}), { rootMargin: "-45% 0px -50% 0px" });
+sections.forEach(s => navObs.observe(s));
+
+$("#loginBtn").addEventListener("click", () => openOverlay("#loginOverlay"));
+$("#loginForm").addEventListener("submit", e => { e.preventDefault(); closeOverlays(); toast("Welcome back! (Demo only, accounts coming soon)"); });
+$("#signupLink").addEventListener("click", e => { e.preventDefault(); closeOverlays(); toast("Sign-ups open soon. Stay tuned!"); });
+$("#premiumBtn").addEventListener("click", () => toast("Premium is launching soon. We'll let you know!"));
+$("#newsletter").addEventListener("submit", e => { e.preventDefault(); e.target.reset(); toast("You're in! Look out for our next budget trip ideas."); });
+
+// reveal on scroll
+const revObs = new IntersectionObserver(entries => entries.forEach(en => {
+  if (en.isIntersecting) { en.target.classList.add("in"); revObs.unobserve(en.target); }
+}), { threshold: 0.12 });
+function observeReveals() { $$(".reveal:not(.in)").forEach(el => revObs.observe(el)); }
+
+// hero count-up
+function countUp() {
+  $$("[data-count]").forEach(el => {
+    const end = +el.dataset.count, pre = el.dataset.prefix || "", t0 = performance.now(), dur = 1200;
+    const step = now => {
+      const p = Math.min(1, (now - t0) / dur), v = Math.round(end * (1 - Math.pow(1 - p, 3)));
+      el.textContent = pre + v;
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}
+
+/* ========================================================= INIT */
+setDefaultDates();
+syncBudget();
+syncNights();
+syncPeople();
+renderResults();
+renderCommunity();
+updateCalc();
+observeReveals();
+countUp();
+</script>
+</body>
+</html>
